@@ -1,6 +1,7 @@
 import Logger from '@mineralts/logger'
 import { RcFile } from './types'
 import { MineralEvent } from '@mineralts/core'
+import { Client } from '@mineralts/api'
 
 export default class Application {
   private static $instance: Application
@@ -21,6 +22,9 @@ export default class Application {
     events: Map<string, Map<string, MineralEvent>>
   }
 
+  public client: Client
+  public token: string
+
   constructor(public readonly appRoot: string, environment: any) {
     this.appName = environment.appName
     this.version = environment.version
@@ -29,10 +33,17 @@ export default class Application {
     this.commands = this.rcFile.commands
     this.statics = this.rcFile.statics
     this.aliases = new Map(Object.entries(this.rcFile.aliases))
+    this.token = environment.token
 
     this.container = {
       events: new Map()
     }
+
+    this.client = new Client(
+      this.container,
+      this.token,
+      {}
+    )
   }
 
   private static getInstance () {
