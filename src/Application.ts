@@ -1,7 +1,8 @@
 import Logger from '@mineralts/logger'
-import { RcFile } from './types'
+import { Intent, RcFile } from './types'
 import { MineralEvent } from '@mineralts/core'
 import { Client } from '@mineralts/api'
+import { Collection } from '@mineralts/core'
 
 export default class Application {
   private static $instance: Application
@@ -9,7 +10,9 @@ export default class Application {
   public logger: Logger = new Logger()
   public readonly appName: string
   public readonly version: string
+
   public readonly mode: string = 'development'
+  public static cdn = 'https://cdn.discordapp.com'
 
   public rcFile: RcFile
   public preloads: any[]
@@ -19,11 +22,12 @@ export default class Application {
   public aliases: Map<string, string> = new Map()
 
   public container: {
-    events: Map<string, Map<string, MineralEvent>>
+    events: Collection<string, Map<string, MineralEvent>>
   }
 
-  public client: Client
-  public token: string
+  public client!: Client
+  public readonly intents: number
+  public readonly token: string
 
   constructor(public readonly appRoot: string, environment: any) {
     this.appName = environment.appName
@@ -36,14 +40,19 @@ export default class Application {
     this.token = environment.token
 
     this.container = {
-      events: new Map()
+      events: new Collection()
     }
 
-    this.client = new Client(
-      this.container,
-      this.token,
-      {}
-    )
+    const intents: 'ALL' | Exclude<keyof typeof Intent, 'ALL'>[] = 'ALL'
+    this.intents = this.getIntentValue(intents)
+  }
+
+  public getIntentValue (intents: 'ALL' | Exclude<keyof typeof Intent, 'ALL'>[]) {
+    return intents
+      ? intents === 'ALL'
+        ? Intent[intents]
+        : intents.reduce((acc: number, current: keyof typeof Intent) => acc + Intent[current], 0)
+      : 0
   }
 
   private static getInstance () {
@@ -60,5 +69,10 @@ export default class Application {
   public static inProduction () {
     const instance = this.getInstance()
     return instance.mode === 'production'
+  }
+
+  public static getClient () {
+    const instance = this.getInstance()
+    return instance.client
   }
 }
