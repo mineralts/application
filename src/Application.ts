@@ -86,4 +86,9 @@ export default class Application {
     const instance = this.getInstance()
     return instance.request
   }
+
+  public static getLogger () {
+    const instance = this.getInstance()
+    return instance.logger
+  }
 }
