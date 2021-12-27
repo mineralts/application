@@ -1,13 +1,15 @@
 import Logger from '@mineralts/logger'
 import { Intent, RcFile } from './types'
-import { MineralEvent } from '@mineralts/core'
+import { Http } from '@mineralts/connector'
+import { MineralEvent, Collection } from '@mineralts/core'
 import { Client } from '@mineralts/api'
-import { Collection } from '@mineralts/core'
 
 export default class Application {
   private static $instance: Application
 
   public logger: Logger = new Logger()
+  public request!: Http
+
   public readonly appName: string
   public readonly version: string
 
@@ -55,6 +57,10 @@ export default class Application {
       : 0
   }
 
+  public registerBinding<T> (key: string, value: T) {
+    this[key] = value
+  }
+
   private static getInstance () {
     return this.$instance
   }
@@ -74,5 +80,10 @@ export default class Application {
   public static getClient () {
     const instance = this.getInstance()
     return instance.client
+  }
+
+  public static createRequest () {
+    const instance = this.getInstance()
+    return instance.request
   }
 }
