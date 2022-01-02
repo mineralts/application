@@ -1,8 +1,8 @@
 import Logger from '@mineralts/logger'
 import { Intent, RcFile } from './types'
 import { Http } from '@mineralts/connector'
-import { MineralEvent, Collection } from '@mineralts/core'
-import { Client } from '@mineralts/api'
+import { MineralEvent } from '@mineralts/core'
+import { Client, Collection } from '@mineralts/api'
 
 export default class Application {
   private static $instance: Application
