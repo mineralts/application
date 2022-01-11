@@ -23,9 +23,10 @@ export default class Application {
 
   public aliases: Map<string, string> = new Map()
 
-  public container: { events: Collection<string, Map<string, MineralEvent>>, commands: Collection<string, any>} = {
+  public container: { events: Collection<string, Map<string, MineralEvent>>, commands: Collection<string, any>, subcommands: Collection<string, any>} = {
     events: new Collection(),
-    commands: new Collection()
+    commands: new Collection(),
+    subcommands: new Collection()
   }
 
   public client!: Client
@@ -87,5 +88,10 @@ export default class Application {
   public static getLogger () {
     const instance = this.getInstance()
     return instance.logger
+  }
+
+  public static getContainer () {
+    const instance = this.getInstance()
+    return instance.container
   }
 }
