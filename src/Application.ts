@@ -23,8 +23,9 @@ export default class Application {
 
   public aliases: Map<string, string> = new Map()
 
-  public container: {
-    events: Collection<string, Map<string, MineralEvent>>
+  public container: { events: Collection<string, Map<string, MineralEvent>>, commands: Collection<string, any>} = {
+    events: new Collection(),
+    commands: new Collection()
   }
 
   public client!: Client
@@ -40,10 +41,6 @@ export default class Application {
     this.statics = this.rcFile.statics
     this.aliases = new Map(Object.entries(this.rcFile.aliases))
     this.token = environment.token
-
-    this.container = {
-      events: new Collection()
-    }
 
     const intents: 'ALL' | Exclude<keyof typeof Intent, 'ALL'>[] = 'ALL'
     this.intents = this.getIntentValue(intents)
