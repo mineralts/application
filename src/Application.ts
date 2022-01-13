@@ -1,8 +1,10 @@
 import Logger from '@mineralts/logger'
 import { Intent, RcFile } from './types'
 import { Http } from '@mineralts/connector'
-import { MineralEvent } from '@mineralts/core'
+import { MineralEvent, Environment } from '@mineralts/core'
 import { Client, Collection } from '@mineralts/api'
+import path from 'path'
+import * as fs from 'fs'
 
 export default class Application {
   private static $instance: Application
@@ -18,8 +20,9 @@ export default class Application {
 
   public rcFile: RcFile
   public preloads: any[]
-  public commands: string[]
+  public commands: Collection<string, any> = new Collection()
   public statics: string[]
+  public environment: Environment = new Environment()
 
   public aliases: Map<string, string> = new Map()
 
@@ -38,7 +41,6 @@ export default class Application {
     this.version = environment.version
     this.rcFile = environment.rcFile
     this.preloads = this.rcFile.preloads
-    this.commands = this.rcFile.commands
     this.statics = this.rcFile.statics
     this.aliases = new Map(Object.entries(this.rcFile.aliases))
     this.token = environment.token
@@ -57,6 +59,33 @@ export default class Application {
 
   public registerBinding<T> (key: string, value: T) {
     this[key] = value
+  }
+
+  public async registerCliCommands () {
+    const commands = this.rcFile.commands
+
+    if (commands.includes('@mineralts/forge')) {
+      const forgePackageLocation = path.join(process.cwd(), 'node_modules', '@mineralts', 'forge')
+      const jsonPackageLocation = path.join(forgePackageLocation, 'package.json')
+      const JsonPackage = await import(jsonPackageLocation)
+
+      await Promise.all(
+        JsonPackage['@mineralts'].commands.map(async (commandDir) => {
+          const location = path.join(forgePackageLocation, commandDir)
+          const files = await fs.promises.readdir(location)
+
+          files.map(async (file: string) => {
+            const { default: Command } = await import(path.join(location, file))
+            const generateManifest = new Command()
+
+            generateManifest.logger = this.logger
+            generateManifest.application = this
+
+            this.commands.set(Command.commandName, generateManifest)
+          })
+        })
+      )
+    }
   }
 
   private static getInstance () {
@@ -94,4 +123,39 @@ export default class Application {
     const instance = this.getInstance()
     return instance.container
   }
+
+  public static getToken () {
+    const instance = this.getInstance()
+    return instance.token
+  }
+
+  public static getEnvironment () {
+    const instance = this.getInstance()
+    return instance.environment.cache
+  }
+
+  public static getRcFile (): RcFile {
+    const instance = this.getInstance()
+    return instance.rcFile
+  }
 }
+
+// await Promise.all(
+//   this.rcFile.commands.flatMap(async (dirPath) => {
+//     const location = path.join(process.cwd(), dirPath)
+//     const files = await fs.promises.readdir(location)
+//
+//     return Promise.all(
+//       files.map(async (file) => {
+//         const fileLocation = path.join(location, file)
+//         const { default: command } = await import(fileLocation.split('.')[0])
+//         const cmd = new command()
+//
+//         cmd.logger = this.logger
+//         cmd.application = this
+//
+//         this.commands.set(cmd.label, cmd)
+//       })
+//     )
+//   })
+// )
