@@ -13,10 +13,11 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
-    "@mineralts/logger": "^1.0.2",
+    "@mineralts/logger": "1.1.1",
     "@types/luxon": "^2.0.5",
     "@types/node": "^16.11.6",
     "axios": "^0.24.0",
+    "js-yaml": "^4.1.0",
     "luxon": "^2.0.2",
     "typescript": "^4.4.4"
   },
