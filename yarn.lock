@@ -31,10 +31,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@mineralts/logger@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@mineralts/logger/-/logger-1.0.2.tgz#bc909291f73cd446278f9dfbdf1b1ed9590d30f5"
-  integrity sha512-WhLDuYuItmZwJDSYcsP6M4jtgYpgjcOrTfK9snMZf+CKZafBlDf0A+Kp7SFVlDHX3BPVCYU0uDlZu3Hvwfc31g==
+"@mineralts/logger@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@mineralts/logger/-/logger-1.1.1.tgz#e8e3471cdb1c422119c78b85fc4fde16c3543a95"
+  integrity sha512-P2xuqLN1BRkOt/Rrhjvx6qWN9c1ElwSfdzW3yxl3BUJeYdY5GO+CAXOLNYyUrKdVlSV5XalTSEbj43g5wusJtA==
   dependencies:
     "@types/pino" "^7.0.5"
     esbuild "^0.14.5"
