@@ -1,7 +1,7 @@
 import Logger from '@mineralts/logger'
 import { Intent, RcFile } from './types'
 import { Http } from '@mineralts/connector'
-import { MineralEvent, Environment } from '@mineralts/core'
+import { MineralEvent, Environment, Helper } from '@mineralts/core'
 import { Client, Collection } from '@mineralts/api'
 import path from 'path'
 import * as fs from 'fs'
@@ -32,6 +32,7 @@ export default class Application {
     subcommands: new Collection()
   }
 
+  public helper: Helper = new Helper()
   public client!: Client
   public readonly intents: number
   public readonly token: string
@@ -138,24 +139,9 @@ export default class Application {
     const instance = this.getInstance()
     return instance.rcFile
   }
-}
 
-// await Promise.all(
-//   this.rcFile.commands.flatMap(async (dirPath) => {
-//     const location = path.join(process.cwd(), dirPath)
-//     const files = await fs.promises.readdir(location)
-//
-//     return Promise.all(
-//       files.map(async (file) => {
-//         const fileLocation = path.join(location, file)
-//         const { default: command } = await import(fileLocation.split('.')[0])
-//         const cmd = new command()
-//
-//         cmd.logger = this.logger
-//         cmd.application = this
-//
-//         this.commands.set(cmd.label, cmd)
-//       })
-//     )
-//   })
-// )
+  public static getHelper (): Helper {
+    const instance = this.getInstance()
+    return instance.helper
+  }
+}
