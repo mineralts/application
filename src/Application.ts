@@ -9,11 +9,13 @@ import * as fs from 'fs'
 export default class Application {
   private static $instance: Application
 
+  public environment: Environment = new Environment()
   public logger: Logger = new Logger()
   public request!: Http
 
   public readonly appName: string
   public readonly version: string
+  public readonly debug: boolean
 
   public readonly mode: string = 'development'
   public static cdn = 'https://cdn.discordapp.com'
@@ -22,7 +24,6 @@ export default class Application {
   public preloads: any[]
   public commands: Collection<string, any> = new Collection()
   public statics: string[]
-  public environment: Environment = new Environment()
 
   public aliases: Map<string, string> = new Map()
 
@@ -40,6 +41,7 @@ export default class Application {
   constructor(public readonly appRoot: string, environment: any) {
     this.appName = environment.appName
     this.version = environment.version
+    this.debug = this.environment.cache.get('DEBUG') || false
     this.rcFile = environment.rcFile
     this.preloads = this.rcFile.preloads
     this.statics = this.rcFile.statics
@@ -65,25 +67,42 @@ export default class Application {
   public async registerCliCommands () {
     const commands = this.rcFile.commands
 
-    if (commands.includes('@mineralts/forge')) {
-      const forgePackageLocation = path.join(process.cwd(), 'node_modules', '@mineralts', 'forge')
-      const jsonPackageLocation = path.join(forgePackageLocation, 'package.json')
-      const JsonPackage = await import(jsonPackageLocation)
+    const invalidLocation = commands.filter((location) => (
+      location.startsWith('./') || location.startsWith('/')
+    ))
 
-      await Promise.all(
-        JsonPackage['@mineralts'].commands.map(async (commandDir) => {
-          const location = path.join(forgePackageLocation, commandDir)
-          const files = await fs.promises.readdir(location)
+    if (invalidLocation.length) {
+      this.logger.fatal('The pre-loaded commands must be commands from npm packages.')
+    }
 
-          files.map(async (file: string) => {
-            const { default: Command } = await import(path.join(location, file))
-            const generateManifest = new Command()
+    await Promise.all(
+      commands.map(async (commandDir) => {
+        const forgePackageLocation = path.join(process.cwd(), 'node_modules', ...commandDir.split('/'))
+        const jsonPackageLocation = path.join(forgePackageLocation, 'package.json')
+        const JsonPackage = await import(jsonPackageLocation)
 
-            generateManifest.logger = this.logger
-            generateManifest.application = this
+        return Promise.all(
+          JsonPackage['@mineralts'].commands.map(async (dir) => {
+            const location = path.join(forgePackageLocation, dir)
+            const files = await fs.promises.readdir(location)
 
-            this.commands.set(Command.commandName, generateManifest)
+            return fetchCommandFiles(files, this.logger, this, this.commands, location)
           })
+        )
+
+      })
+    )
+
+    function fetchCommandFiles (files, logger, application, commands, location) {
+      return Promise.all(
+        files.map(async (file: string) => {
+          const { default: Command } = await import(path.join(location, file))
+          const command = new Command()
+
+          command.logger = logger
+          command.application = application
+
+          commands.set(Command.commandName, command)
         })
       )
     }
