@@ -4,7 +4,7 @@ import { Http } from '@mineralts/connector'
 import { MineralEvent, Environment, Helper } from '@mineralts/core'
 import { Client, Collection } from '@mineralts/api'
 import path from 'path'
-import * as fs from 'fs'
+import fs from 'fs'
 
 export default class Application {
   private static $instance: Application
