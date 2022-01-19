@@ -36,9 +36,10 @@ export default class Application {
   public helper: Helper = new Helper()
   public client!: Client
   public readonly intents: number
-  public readonly token: string
 
   constructor(public readonly appRoot: string, environment: any) {
+    this.environment.registerEnvironment()
+
     this.appName = environment.appName
     this.version = environment.version
     this.debug = this.environment.cache.get('DEBUG') || false
@@ -46,7 +47,6 @@ export default class Application {
     this.preloads = this.rcFile.preloads
     this.statics = this.rcFile.statics
     this.aliases = new Map(Object.entries(this.rcFile.aliases))
-    this.token = environment.token
 
     const intents: 'ALL' | Exclude<keyof typeof Intent, 'ALL'>[] = 'ALL'
     this.intents = this.getIntentValue(intents)
@@ -146,7 +146,7 @@ export default class Application {
 
   public static getToken () {
     const instance = this.getInstance()
-    return instance.token
+    return instance.environment.cache.get('TOKEN')
   }
 
   public static getEnvironment () {
